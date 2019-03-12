@@ -1,4 +1,4 @@
-# Gradle IKVM Plugin [![Build status](https://ci.appveyor.com/api/projects/status/31ut9l170kfbjyq3?svg=true)](https://ci.appveyor.com/project/gluck/gradle-ikvm-plugin) [![Join the chat at https://gitter.im/Ullink/gradle-ikvm-plugin](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Ullink/gradle-ikvm-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# Gradle IKVM Plugin
 
 This plugin allows to compile the project jar into a .Net assembly using [IKVM](http://www.ikvm.net/).
 It supports various IKVM flags, and also allows for .Net API documentation generation.
@@ -28,7 +28,7 @@ Build script snippet can be used in all Gradle versions:
         }
 
         dependencies {
-            classpath "com.ullink.gradle:gradle-ikvm-plugin:2.3"
+            classpath "org.mini2Dx:gradle-ikvm-plugin:2.10.0"
         }
     }
 
@@ -37,12 +37,6 @@ Build script snippet can be used in all Gradle versions:
 
     repositories {
         mavenCentral()
-    }
-
-Build script snippet can be used instead with Gradle 2.1+
-
-    plugins {
-      id "com.ullink.ikvm" version "2.3"
     }
 
 More options:
@@ -63,7 +57,7 @@ More options:
         // Below values have sensible __defaults__ but can be overriden
 
         // input jar(s) to transform to IL (defaults to jar task output)
-        jars = [ jar.archivePath ]
+        jars = project.files( jar.archivePath )
 
         // Where will the assembly be generated
         destinationDir = jar.destinationDir
