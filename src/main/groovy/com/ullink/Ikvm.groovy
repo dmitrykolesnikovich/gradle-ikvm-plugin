@@ -41,17 +41,17 @@ class Ikvm extends ConventionTask {
 
     Ikvm() {
         conventionMapping.map "destinationDir", { project.jar.destinationDir }
-        conventionMapping.map "jars", { [ project.jar.archivePath ] }
+        conventionMapping.map "jars", { project.files(project.jar.archivePath) }
         conventionMapping.map "assemblyName", { project.name }
         conventionMapping.map "version", { project.version }
-        outputs.files {
-            if (generateDoc) {
+        if (generateDoc) {
+            outputs.file {
                 return project.tasks.ikvmDoc.getDestinationFile()
             }
         }
-        outputs.files {
-            if (debug) {
-                getDestinationDebugFile()
+        if (debug) {
+            outputs.file {
+                return getDestinationDebugFile()
             }
         }
         project.afterEvaluate {

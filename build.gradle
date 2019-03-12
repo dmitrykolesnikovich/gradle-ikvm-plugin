@@ -1,48 +1,92 @@
-plugins {
-    id "nu.studer.plugindev" version "1.0.3"
-    id "com.ullink.functions" version "1.0"
-    id "com.jfrog.bintray" version "1.2"
-    id 'net.researchgate.release' version '2.3.4'
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'https://plugins.gradle.org/m2/' }
+    }
+    dependencies {
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.9.0'
+    }
 }
 
-apply plugin: 'groovy'
+if(project.hasProperty('ossrhUser') && project.hasProperty("release")) {
+    apply plugin: "io.codearte.nexus-staging"
 
-group = 'com.ullink.gradle'
+    nexusStaging {
+        packageGroup = 'org.mini2Dx'
+        username = ossrhUser
+        password = ossrhPassword
+    }
+}
+
+ext {
+    commonsCodecVersion="1.10"
+    commonsIoVersion="2.5"
+    commonsLangVersion="3.4"
+
+    junitVersion="4.8.2"
+    jmockVersion="2.5.1"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    maven { url 'https://maven.google.com' }
+}
+
+apply plugin: "signing"
+apply plugin: "maven"
+apply plugin: "java"
+apply plugin: "groovy"
+
+group = 'org.mini2Dx'
+version = '2.10.0-SNAPSHOT'
 description 'gradle-ikvm-plugin is a Gradle plugin for IKVM artifact compilation'
 
-sourceCompatibility = 1.6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+def getTools = { ->
+    def jHome = System.getProperty('java.home')
+    def path = new File(jHome, 'lib/tools.jar')
+    if (path.exists()) {
+        return project.files(path)
+    }
+    path = new File(jHome, '../lib/tools.jar')
+    if (path.exists()) {
+        return project.files(path)
+    }
+}
 
 dependencies {
-    compile fileTree(dir: "${gradle.gradleHomeDir}/lib/plugins", include: "gradle-plugins-*.jar")
+    compile gradleApi()
+    compile localGroovy()
     compile getTools()
-    compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'commons-io:commons-io:2.5'
-    compile 'commons-codec:commons-codec:1.10'
-    testCompile 'junit:junit:4.8.2'
-}
+    compile "commons-codec:commons-codec:${commonsCodecVersion}"
+    compile "commons-io:commons-io:${commonsIoVersion}"
+    compile "org.apache.commons:commons-lang3:${commonsLangVersion}"
 
-bintray {
-    // to remove when upgraded plugindev to 1.0.4
-    user project.properties.bintrayUser
-    key project.properties.bintrayApiKey
-    pkg.repo = 'gradle-plugins'
-    pkg.version.gpg.sign = true
-    pkg.userOrg = 'ullink'
-}
-
-plugindev {
-    pluginId 'com.ullink.ikvm'
-    pluginName 'com.ullink.gradle:gradle-ikvm-plugin'
-    pluginImplementationClass 'com.ullink.IkvmPlugin'
-    pluginDescription project.description
-    pluginLicenses 'Apache-2.0'
-    pluginTags 'gradle', 'ikvm', 'java'
-    authorId 'gluck'
-    authorName 'Francois Valdy'
-    authorEmail 'francois.valdy@gmail.com'
-    projectUrl "https://github.com/Ullink/${project.name}"
-    projectInceptionYear '2012'
-    done()
+    testCompile "junit:junit:${junitVersion}"
 }
 
 if (JavaVersion.current().isJava8Compatible()) {
@@ -53,4 +97,49 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
-project.tasks.afterReleaseBuild.dependsOn project.tasks.bintrayUpload
+if(project.hasProperty('ossrhUser')) {
+    signing {
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                // POM signature
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                // Target repository
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUser, password: ossrhPassword)
+                }
+                pom.project {
+                    name project.name
+                    description project.description
+                    packaging 'jar'
+                    url 'https://github.com/mini2Dx/gradle-ikvm-plugin'
+
+                    scm {
+                        connection 'scm:git:https://github.com/mini2Dx/gradle-ikvm-plugin.git'
+                        developerConnection 'scm:git:git@github.com:mini2Dx/gradle-ikvm-plugin.git'
+                        url 'https://github.com/mini2Dx/gradle-ikvm-plugin.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'Apache License 2.0'
+                            url 'https://opensource.org/licenses/Apache-2.0'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'tomcashman'
+                            name = 'Thomas Cashman'
+                            email = 'thomascashman404@gmail.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
