@@ -1,0 +1,3 @@
+[2.10.0]
+- Support Gradle 5.x
+- Fix IkvmDoc task not working when used in subprojects

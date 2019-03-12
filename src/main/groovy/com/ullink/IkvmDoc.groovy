@@ -15,7 +15,12 @@ class IkvmDoc extends Javadoc {
             project.tasks.ikvm.getDestFile()
         }
         options.doclet = IKVMDocLet.class.getName()
-        options.docletpath = project.buildscript.configurations.classpath.files.asType(List)
+        def pluginClasspath = project.getBuildscript().getConfigurations().getByName('classpath').files.asType(List)
+        if(pluginClasspath.isEmpty()) {
+            options.setDocletpath(project.getRootProject().getBuildscript().getConfigurations().getByName('classpath').files.asType(List))
+        } else {
+            options.setDocletpath(project.getBuildscript().getConfigurations().getByName('classpath').files.asType(List))
+        }
     }
     
     protected void setOutput(AbstractTask task) {
