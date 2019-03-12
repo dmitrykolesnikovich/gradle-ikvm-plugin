@@ -43,8 +43,8 @@ apply plugin: "java"
 apply plugin: "groovy"
 
 group = 'org.mini2Dx'
-version = '2.10.0-SNAPSHOT'
-description 'gradle-ikvm-plugin is a Gradle plugin for IKVM artifact compilation'
+version = '2.10.0'
+description 'Gradle plugin for IKVM artifact compilation'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
