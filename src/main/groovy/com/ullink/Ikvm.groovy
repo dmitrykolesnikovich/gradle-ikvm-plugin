@@ -35,6 +35,7 @@ class Ikvm extends ConventionTask {
     String platform
     String remap
     def warnAsError
+    def dllReferences
 
     @InputFiles
     def jars
@@ -239,6 +240,12 @@ class Ikvm extends ConventionTask {
 
         commandLineArgs += getJars()
         commandLineArgs += getReferences().collect{"-reference:${it}"}
+
+        if(dllReferences.any()) {
+            dllReferences.each {
+                commandLineArgs += "-reference:${it}"
+            }
+        }
 
         return commandLineArgs;
     }
