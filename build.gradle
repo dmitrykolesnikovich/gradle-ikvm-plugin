@@ -43,7 +43,7 @@ apply plugin: "java"
 apply plugin: "groovy"
 
 group = 'org.mini2Dx'
-version = '2.10.1'
+version = '2.10.2-SNAPSHOT'
 description 'Gradle plugin for IKVM artifact compilation'
 
 sourceCompatibility = 1.7
